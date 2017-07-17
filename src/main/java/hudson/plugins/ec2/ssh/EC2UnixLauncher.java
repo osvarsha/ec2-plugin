@@ -90,9 +90,13 @@ public class EC2UnixLauncher extends EC2ComputerLauncher {
 
             if (initScript != null && initScript.trim().length() > 0
                     && sshClient.run("test -e ~/.hudson-run-init", logger) != 0) {
-                log.info("Executing init script");
+                log.info("Copying init script");
                 sshClient.put(initScript.getBytes("UTF-8"), "init.sh", tmpDir, "0700");
 
+                log.info("Updating permissions of init script");
+                sshClient.run(buildUpCommand(computer, "chmod 700 " + tmpDir + "/init.sh"), logger);
+
+                log.info("Executing init script");
                 sshClient.run(buildUpCommand(computer, tmpDir + "/init.sh"), logger);
 
                 sshClient.run(buildUpCommand(computer, "touch ~/.hudson-run-init"), logger);
